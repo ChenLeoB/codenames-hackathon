@@ -37,6 +37,19 @@ class Player:
     
     def make_guess(self, hint, number):
         return self.player.make_guess(hint, number, self.game_words, self.guess_status)
+
+class randomPlayer():
+    def __init__(self, word_base):
+    
+    def give_hint(self, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
+        return "woof"
+    
+    def make_guess(self, hint, number, game_words, guess_status):
+        # make random valid guesses
+        number_of_guesses = number + 1
+        words_not_guessed = game_words[np.argwhere(guess_status == 0)]
+        guesses = np.random.choice(words_not_guessed, number_of_guesses, replace=False)
+        return guesses
     
 class BasicLLM():
     def __init__(self, word_base):

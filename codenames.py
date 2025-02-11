@@ -15,8 +15,8 @@ class Codenames:
         self.seed = seed
         self.output_file = output_file
         np.random.seed(self.seed)
-        # TODO: remove wordbase and just use an array of words 
-        self.word_base = WordBase(data_encodings[data_file])
+        # TODO: this is the word that comes from data_encoding.py
+        self.add_game_words = []
         self.initiate_game()
         self.initiate_players(players)
 
@@ -25,6 +25,7 @@ class Codenames:
         # Randomly choose 25 words and assign to teams (9 -> red,8 -> blue,7 -> neutral,1 -> assassin)
         self.game_words = np.random.choice(self.word_base.get_codenames_words(), 25, replace=False)
         self.guess_status = np.zeros(25)
+        # TODO: is this dangerous? if player see this they can just always guess depending on the order
         self.word_team = [1] * 9 + [2] * 8 + [3] * 7 + [4]
         # Resuffle for random display
         self.display_order = np.random.choice(range(25), 25, replace=False)
