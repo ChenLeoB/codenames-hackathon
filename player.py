@@ -39,7 +39,8 @@ class Player:
         return self.player.make_guess(hint, number, self.game_words, self.guess_status)
 
 class randomPlayer():
-    def __init__(self, word_base):
+    def __init__(self, name):
+        self.name = name
     
     def give_hint(self, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
         return "woof"
