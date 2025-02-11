@@ -7,3 +7,5 @@ words = []
 with open('words.txt', 'r') as f:
     for line in f:
         words.append(line.strip())
+
+all_game_words = words

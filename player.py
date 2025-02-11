@@ -6,7 +6,7 @@ import re
 
 class Player:
 
-    def __init__(self, player_type, teammate_type, word_base, game_words, guess_status, team, role, seed):
+    def __init__(self, player_type, teammate_type, game_words, guess_status, team, role, seed):
         self.game_words = game_words
         self.guess_status = guess_status
         self.role = role
@@ -21,9 +21,9 @@ class Player:
         self.assassin_word =  game_words[24]
         # Initiate Player instances
         if player_type == 'ai':
-            self.player = AI(teammate_type, word_base, seed)
+            self.player = randomPlayer("woof")
         else:
-            self.player = Human(word_base)
+            self.player = Human("woof")
     
     def give_hint(self):
         return self.player.give_hint(
@@ -43,32 +43,33 @@ class randomPlayer():
         self.name = name
     
     def give_hint(self, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
-        return "woof"
+        return "woof", 1
     
     def make_guess(self, hint, number, game_words, guess_status):
         # make random valid guesses
         number_of_guesses = number + 1
-        words_not_guessed = game_words[np.argwhere(guess_status == 0)]
+        words_not_guessed = game_words[np.where(guess_status == 0)]
         guesses = np.random.choice(words_not_guessed, number_of_guesses, replace=False)
         return guesses
     
-class BasicLLM():
-    def __init__(self, word_base):
-        #TODO: no need this 
-        self.word_base = word_base
+# class BasicLLM():
+#     def __init__(self, word_base):
+#         #TODO: no need this 
+#         self.word_base = word_base
     
-    def give_hint(self, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
-        #TODO: validation would be one word and not directly in the game words
-        #TODO: just queries LLM
+#     def give_hint(self, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
+#         #TODO: validation would be one word and not directly in the game words
+#         #TODO: just queries LLM
     
-    def make_guess(self, hint, number, game_words, guess_status):
-        #TODO: validation needs to be a word from the board
-        #TODO: just queries LLM
+#     def make_guess(self, hint, number, game_words, guess_status):
+#         #TODO: validation needs to be a word from the board
+#         #TODO: just queries LLM
+
         
 
 class Human():
-    def __init__(self, word_base):
-        self.word_base = word_base
+    def __init__(self, name):
+        self.name = name
     
     def give_hint(self, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
         while True:
@@ -77,11 +78,7 @@ class Human():
                 print("Please check the format of your input and attempt again.")
                 continue
             word, count = user_input.split()
-            if word not in self.word_base.get_dictionary_words():
-                print("Sorry, the word \"{}\" you just inputed is not in our current word base, please try another word.".format(word))
-                time.sleep(1)
-            else:
-                break
+            break
         word_obj = self.word_base.get_dictionary_words()[np.where([x==word for x in self.word_base.get_dictionary_words()])[0][0]]
         return word_obj, int(count)
     

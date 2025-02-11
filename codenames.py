@@ -1,13 +1,14 @@
 import numpy as np
 import json
 from termcolor import colored, cprint
-from player import Player, AI, Human
+from player import Player, randomPlayer, Human
 from wordBase import WordBase, Word
-from data_encoding import data_encodings
+from word_reader import all_game_words
 import argparse
 import time
 import os
 
+#TODO we can remove data_file
 
 class Codenames:
     def __init__(self, players, mode, data_file, seed, output_file):
@@ -15,15 +16,15 @@ class Codenames:
         self.seed = seed
         self.output_file = output_file
         np.random.seed(self.seed)
-        # TODO: this is the word that comes from data_encoding.py
-        self.add_game_words = []
+        # All game words from word_reader.py
+        self.all_game_words = all_game_words
         self.initiate_game()
         self.initiate_players(players)
 
     def initiate_game(self):
         # TODO: modify this so that we are just getting 25 random words from our word list from the txt
         # Randomly choose 25 words and assign to teams (9 -> red,8 -> blue,7 -> neutral,1 -> assassin)
-        self.game_words = np.random.choice(self.word_base.get_codenames_words(), 25, replace=False)
+        self.game_words = np.random.choice(self.all_game_words, 25, replace=False)
         self.guess_status = np.zeros(25)
         # TODO: is this dangerous? if player see this they can just always guess depending on the order
         self.word_team = [1] * 9 + [2] * 8 + [3] * 7 + [4]
@@ -33,10 +34,10 @@ class Codenames:
     
     def initiate_players(self, players):
         # todo remove word_base
-        self.ta_ms = Player(players[0], players[1], self.word_base, self.game_words, self.guess_status, 'a', 'spymaster', self.seed)
-        self.ta_gs = Player(players[1], players[0], self.word_base, self.game_words, self.guess_status, 'a', 'guesser', self.seed)
-        self.tb_ms = Player(players[2], players[3], self.word_base, self.game_words, self.guess_status, 'b', 'spymaster', self.seed)
-        self.tb_gs = Player(players[3], players[2], self.word_base, self.game_words, self.guess_status, 'b', 'guesser', self.seed)
+        self.ta_ms = Player(players[0], players[1], self.game_words, self.guess_status, 'a', 'spymaster', self.seed)
+        self.ta_gs = Player(players[1], players[0], self.game_words, self.guess_status, 'a', 'guesser', self.seed)
+        self.tb_ms = Player(players[2], players[3], self.game_words, self.guess_status, 'b', 'spymaster', self.seed)
+        self.tb_gs = Player(players[3], players[2], self.game_words, self.guess_status, 'b', 'guesser', self.seed)
         return None
         
     def display_board(self, status_ref, team, turn):
@@ -48,7 +49,7 @@ class Codenames:
         color_ref = {0: 'yellow', 1: 'red', 2: 'cyan', 3: 'yellow', 4: 'magenta'}
         for i in range(5):
             for j in range(5):
-                word = self.game_words[self.display_order[i*5+j]].word
+                word = self.game_words[self.display_order[i*5+j]]
                 color = color_ref[status_ref[self.display_order[i*5+j]]]
                 if self.guess_status[self.display_order[i*5+j]] != 0:
                     cprint(word.center(17), color, 'on_{}'.format(color), end='')
@@ -83,9 +84,8 @@ class Codenames:
         assassin = False
         while True:
             # TEAM A GIVE HINT
-            if isinstance(self.ta_ms.player, Human) or isinstance(self.ta_gs.player, AI):
-                self.display_board(self.word_team, 'A', turn)
-                time.sleep(4 * (self.mode=='interactive'))
+            self.display_board(self.word_team, 'A', turn)
+            time.sleep(4 * (self.mode=='interactive'))
             word, count = self.ta_ms.give_hint()
             
             # TEAM A GUESS
@@ -121,9 +121,8 @@ class Codenames:
             time.sleep(2 * (self.mode=='interactive'))
 
             # TEAM B GIVE HINT
-            if isinstance(self.tb_ms.player, Human) or isinstance(self.tb_gs.player, AI):
-                self.display_board(self.word_team, 'B', turn)
-                time.sleep(4 * (self.mode=='interactive'))
+            self.display_board(self.word_team, 'B', turn)
+            time.sleep(4 * (self.mode=='interactive'))
             word, count = self.tb_ms.give_hint()
             
             # TEAM B GUESS
