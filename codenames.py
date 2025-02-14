@@ -2,10 +2,10 @@ import numpy as np
 import json
 from termcolor import colored, cprint
 from player import Player, randomPlayer, Human
-from wordBase import WordBase, Word
 from word_reader import all_game_words
 import argparse
 import time
+import importlib
 import os
 
 #TODO we can remove data_file
@@ -33,11 +33,19 @@ class Codenames:
         return None
     
     def initiate_players(self, players):
+        module = importlib.import_module('agents.' + players[0])
+        team_a = getattr(module, players[1])
+
+        # className = getattr(module, team_a_class)
         # todo remove word_base
-        self.ta_ms = Player(players[0], players[1], self.game_words, self.guess_status, 'a', 'spymaster', self.seed)
-        self.ta_gs = Player(players[1], players[0], self.game_words, self.guess_status, 'a', 'guesser', self.seed)
-        self.tb_ms = Player(players[2], players[3], self.game_words, self.guess_status, 'b', 'spymaster', self.seed)
-        self.tb_gs = Player(players[3], players[2], self.game_words, self.guess_status, 'b', 'guesser', self.seed)
+        self.ta_ms = team_a('a', 'spymaster', self.seed)
+        self.ta_gs = team_a('a', 'guesser', self.seed)
+
+
+        module = importlib.import_module('agents.' + players[2])
+        team_b = getattr(module, players[3])
+        self.tb_ms = team_b('b', 'spymaster', self.seed)
+        self.tb_gs = team_b('b', 'guesser', self.seed)
         return None
         
     def display_board(self, status_ref, team, turn):
@@ -86,12 +94,17 @@ class Codenames:
             # TEAM A GIVE HINT
             self.display_board(self.word_team, 'A', turn)
             time.sleep(4 * (self.mode=='interactive'))
-            word, count = self.ta_ms.give_hint()
+            team_a_words = self.game_words[:9]
+            team_b_words = self.game_words[9:17]
+            neutral_words = self.game_words[17:24]
+            assasin_word = self.game_words[24]
+            word, count = self.ta_ms.give_hint(self.game_words, self.guess_status, team_a_words, team_b_words, neutral_words, assasin_word)
             
             # TEAM A GUESS
             self.display_board(self.guess_status, 'A', turn)
             print("TEAM A Spymaster: My hint is {}: {}".format(word, count))
-            guess = self.ta_gs.make_guess(word, count)
+            words_not_guessed = self.game_words[np.where(self.guess_status == 0)]
+            guess = self.ta_gs.make_guess(word, count, words_not_guessed, self.guess_status)
             for word in guess:
                 time.sleep(2 * (self.mode=='interactive'))
                 print("TEAM A Guesser: I guess \"{}\" is our word".format(word))
@@ -123,12 +136,13 @@ class Codenames:
             # TEAM B GIVE HINT
             self.display_board(self.word_team, 'B', turn)
             time.sleep(4 * (self.mode=='interactive'))
-            word, count = self.tb_ms.give_hint()
+            word, count = self.tb_ms.give_hint(self.game_words, self.guess_status, team_b_words, team_a_words, neutral_words, assasin_word)
             
             # TEAM B GUESS
             self.display_board(self.guess_status, 'B', turn)
             print("TEAM B Spymaster: My hint is {}: {}".format(word, count))
-            guess = self.tb_gs.make_guess(word, count)
+            words_not_guessed = self.game_words[np.where(self.guess_status == 0)]
+            guess = self.tb_gs.make_guess(word, count, words_not_guessed, self.guess_status)
             for word in guess:
                 time.sleep(2 * (self.mode=='interactive'))
                 print("TEAM B Guesser: I guess \"{}\" is our word".format(word))
@@ -165,16 +179,15 @@ class Codenames:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--players', type=int, nargs='+', default=[2, 2, 2, 2], help='list of player types [1. Human / 2. AI]')
+    parser.add_argument('-p', '--players', type=str, nargs='+', help='list of player types [1. Human / 2. AI]')
     parser.add_argument('-m', '--mode', type=str, default='interactive', help='mode of the game (interactive / testing)')
     parser.add_argument('-d', '--data_file', type=int, default=1, help='dataset used by AI in the game (1. cosine_wiki_30k / 2. wup_wiki_30k)')
     parser.add_argument('-s', '--seed', type=int, default=np.random.randint(2**31 - 1), help='random seed used in this game (0 - 2^31-1)')
     parser.add_argument('-o', '--output_file', type=str, default=None, help='the file to record statistics')
     opt = parser.parse_args()
 
-    input_encoding = {1: 'human', 2: 'ai'}
     game = Codenames(
-        [input_encoding[p] for p in opt.players],
+        opt.players,
         opt.mode,
         opt.data_file,
         opt.seed,
