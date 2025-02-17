@@ -5,11 +5,11 @@ print(" "*20 + "--- CODENAMES GAME WITH AI ---")
 print("Please follow the instructions below to type in the settings for your game...")
 
 
-team_a_file = str(input("Enter the name of your file: "))
-team_a_class = str(input("Enter the name of your class: "))
+team_a_file = str(input("Enter the name of your file for Team A: "))
+team_a_class = str(input("Enter the name of your class for Team A: "))
 
-team_b_file = str(input("Enter the name of your file: "))
-team_b_class = str(input("Enter the name of your class: "))
+team_b_file = str(input("Enter the name of your file for Team B: "))
+team_b_class = str(input("Enter the name of your class for Team B: "))
 
 players = " ".join([team_a_file, team_a_class, team_b_file, team_b_class])
 

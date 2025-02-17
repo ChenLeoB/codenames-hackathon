@@ -17,6 +17,32 @@ class Player:
     
     def make_guess(self, hint, number, game_words, guess_status):
         return
+    
+    def validate_hint(self, word, count, game_words):
+        if len(re.findall('^[A-Za-z]+$', word)) == 0:
+            print("Please check the format of your input and attempt again.")
+            time.sleep(1)
+            return False
+        for game_word in game_words:
+            # if clue word contains a board word, return False
+            if game_word.find(word) != -1:
+                return False
+        if count <=0:
+            print("Invalid Count! :{count}\nPlease try again.")
+            time.sleep(1)
+            return False
+        return True
+    
+    def validate_guess(self, guesses, number, game_words, guess_status):
+        if len(guesses) > number + 1:
+            print("The maximum number of guesses allowed is {}, please try again.".format(number + 1))
+            return False
+        else:
+            for word in guesses:
+                if word not in game_words or guess_status[np.argwhere(game_words == word)[0]] != 0:
+                    print("Sorry, the word \"{}\" you just inputted is not on the board, please try again.".format(word))
+                    return False
+        return True
 
 
 
