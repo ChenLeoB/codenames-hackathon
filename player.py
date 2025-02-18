@@ -17,7 +17,7 @@ class Player:
     
     def make_guess(self, hint, number, game_words, guess_status):
         return
-    
+
     def validate_hint(self, word, count, game_words):
         if len(re.findall('^[A-Za-z]+$', word)) == 0:
             print("Please check the format of your input and attempt again.")
@@ -34,7 +34,7 @@ class Player:
         return True
     
     def validate_guess(self, guesses, number, game_words, guess_status):
-        if len(guesses) > number + 1:
+        if len(guesses) > int(number) + 1:
             print("The maximum number of guesses allowed is {}, please try again.".format(number + 1))
             return False
         else:
@@ -43,7 +43,6 @@ class Player:
                     print("Sorry, the word \"{}\" you just inputted is not on the board, please try again.".format(word))
                     return False
         return True
-
 
 
 class randomPlayer():

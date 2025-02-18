@@ -33,19 +33,24 @@ class Codenames:
         return None
     
     def initiate_players(self, players):
+        # print(players)
         module = importlib.import_module('agents.' + players[0])
         team_a = getattr(module, players[1])
 
         # className = getattr(module, team_a_class)
         # todo remove word_base
-        self.ta_ms = team_a('a', 'spymaster', self.seed)
-        self.ta_gs = team_a('a', 'guesser', self.seed)
+        # self.ta_ms = team_a('a', 'spymaster', self.seed)
+        # self.ta_gs = team_a('a', 'guesser', self.seed)
+        self.ta_ms = team_a()
+        self.ta_gs = team_a()
 
 
         module = importlib.import_module('agents.' + players[2])
         team_b = getattr(module, players[3])
-        self.tb_ms = team_b('b', 'spymaster', self.seed)
-        self.tb_gs = team_b('b', 'guesser', self.seed)
+        # self.tb_ms = team_b('b', 'spymaster', self.seed)
+        # self.tb_gs = team_b('b', 'guesser', self.seed)
+        self.tb_ms = team_b()
+        self.tb_gs = team_b()
         return None
         
     def display_board(self, status_ref, team, turn):
@@ -86,25 +91,32 @@ class Codenames:
     #     with open(self.output_file, 'a') as f:
     #         f.write(",".join([turn, assassin, self.word_base.get_data_file_name(), str(self.seed)]) + "\n")
     #     return None
+
+    def get_turn_words(self, guess_words, words):
+        temp = [word for word in words if word not in guess_words]
+        return temp
+
     
     def play(self):
         turn = 1
         assassin = False
+        self.guesses = []
         while True:
             # TEAM A GIVE HINT
             self.display_board(self.word_team, 'A', turn)
             time.sleep(4 * (self.mode=='interactive'))
-            team_a_words = self.game_words[:9]
-            team_b_words = self.game_words[9:17]
-            neutral_words = self.game_words[17:24]
-            assasin_word = self.game_words[24]
-            word, count = self.ta_ms.give_hint(self.game_words, self.guess_status, team_a_words, team_b_words, neutral_words, assasin_word)
+            team_a_words = self.get_turn_words(self.guesses, self.game_words[:9])
+            team_b_words = self.get_turn_words(self.guesses, self.game_words[9:17])
+            neutral_words = self.get_turn_words(self.guesses, self.game_words[17:24])
+            assasin_word = self.get_turn_words(self.guesses, self.game_words[24])
+            word, count = self.ta_ms.give_hint('A', 'B', self.game_words, self.guess_status, team_a_words, team_b_words, neutral_words, assasin_word)
             
             # TEAM A GUESS
             self.display_board(self.guess_status, 'A', turn)
             print("TEAM A Spymaster: My hint is {}: {}".format(word, count))
             words_not_guessed = self.game_words[np.where(self.guess_status == 0)]
-            guess = self.ta_gs.make_guess(word, count, words_not_guessed, self.guess_status)
+            getGuessA = self.ta_gs.make_guess(word, count, words_not_guessed, self.guess_status)
+            guess = getGuessA
             for word in guess:
                 time.sleep(2 * (self.mode=='interactive'))
                 print("TEAM A Guesser: I guess \"{}\" is our word".format(word))
@@ -126,6 +138,8 @@ class Codenames:
                     self.guess_status[idx_in_game_words] = 4
                     assassin = True
                     break
+
+            self.guesses += getGuessA
             
             # TEAM A FINISH
             if self.check_game_end('A', turn):
@@ -136,13 +150,20 @@ class Codenames:
             # TEAM B GIVE HINT
             self.display_board(self.word_team, 'B', turn)
             time.sleep(4 * (self.mode=='interactive'))
-            word, count = self.tb_ms.give_hint(self.game_words, self.guess_status, team_b_words, team_a_words, neutral_words, assasin_word)
+
+            team_a_words = self.get_turn_words(self.guesses, self.game_words[:9])
+            team_b_words = self.get_turn_words(self.guesses, self.game_words[9:17])
+            neutral_words = self.get_turn_words(self.guesses, self.game_words[17:24])
+            assasin_word = self.get_turn_words(self.guesses, self.game_words[24])
+
+            word, count = self.tb_ms.give_hint('B', 'A', self.game_words, self.guess_status, team_b_words, team_a_words, neutral_words, assasin_word)
             
             # TEAM B GUESS
             self.display_board(self.guess_status, 'B', turn)
             print("TEAM B Spymaster: My hint is {}: {}".format(word, count))
             words_not_guessed = self.game_words[np.where(self.guess_status == 0)]
-            guess = self.tb_gs.make_guess(word, count, words_not_guessed, self.guess_status)
+            getGuessB = self.tb_gs.make_guess(word, count, words_not_guessed, self.guess_status)
+            guess = getGuessB
             for word in guess:
                 time.sleep(2 * (self.mode=='interactive'))
                 print("TEAM B Guesser: I guess \"{}\" is our word".format(word))
@@ -171,6 +192,8 @@ class Codenames:
             time.sleep(2 * (self.mode=='interactive'))
 
             turn += 1
+
+            self.guesses += getGuessB
         
         # Wrap up and Recording
         print("For reproducibility, the random seed used in this game is {}.".format(self.seed))
