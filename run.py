@@ -13,7 +13,7 @@ team_b_class = str(input("Enter the name of your class for Team B: "))
 
 players = " ".join([team_a_file, team_a_class, team_b_file, team_b_class])
 
-mode = input("Please set the mode for this game. Press enter to skip [interactive / testing]: ")
+mode = input("Please set the mode for this game. Press enter to skip [interactive / testing/ batch]: ")
 mode = mode if mode != "" else 'interactive'
 
 data_file = input("Choose the data file for this game. If no preference, press enter to skip [1. GloVe / 2. Word2Vec 3./ WordNet]: ")

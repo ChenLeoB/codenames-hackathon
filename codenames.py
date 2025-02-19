@@ -12,6 +12,7 @@ import os
 
 class Codenames:
     def __init__(self, players, mode, data_file, seed, output_file):
+        print("Starting a new game of Codenames on seed {}...".format(seed))
         self.mode = mode
         self.seed = seed
         self.output_file = output_file
@@ -54,6 +55,8 @@ class Codenames:
         return None
         
     def display_board(self, status_ref, team, turn):
+        if (self.mode == 'batch'):
+            return None
         color = 'red' if team == 'A' else 'cyan'
         os.system('cls' if os.name in ('nt', 'dos') else 'clear')
         cprint("*" * 85, color)
@@ -73,19 +76,20 @@ class Codenames:
     
     def check_game_end(self, team, turn):
         other_team = {'A': 'B', 'B': 'A'}
+        print(self.guess_status)
         if 0 not in self.guess_status[:9]:
             self.display_board(self.guess_status, team, turn)
             print("GAME OVER IN {} TURNS! TEAM A wins this one by finding out all their words!".format(turn))
-            return True
+            return True, 'A'
         if 0 not in self.guess_status[9:17]:
             self.display_board(self.guess_status, team, turn)
             print("GAME OVER IN {} TURNS! TEAM B wins this one by finding out all their words!".format(turn))
-            return True
+            return True, 'B'
         if self.guess_status[-1] != 0:
             self.display_board(self.guess_status, team, turn)
             print("GAME OVER IN {} TURNS! TEAM {} wins this one as TEAM {} revealed the assassin word!".format(turn, other_team[team], team))
-            return True
-        return False
+            return True, other_team[team]
+        return False, None
 
     # def record_statistics(self, turn, assassin):
     #     with open(self.output_file, 'a') as f:
@@ -142,7 +146,8 @@ class Codenames:
             self.guesses += getGuessA
             
             # TEAM A FINISH
-            if self.check_game_end('A', turn):
+            game_ended, winner = self.check_game_end('A', turn)
+            if game_ended:
                 break
             print("END OF TURN")
             time.sleep(2 * (self.mode=='interactive'))
@@ -186,7 +191,8 @@ class Codenames:
                     assassin = True
                     break
             # TEAM B FINISH
-            if self.check_game_end('B', turn):
+            game_ended, winner = self.check_game_end('B', turn)
+            if game_ended:
                 break
             print("END OF TURN")
             time.sleep(2 * (self.mode=='interactive'))
@@ -197,17 +203,41 @@ class Codenames:
         
         # Wrap up and Recording
         print("For reproducibility, the random seed used in this game is {}.".format(self.seed))
+        return winner
         # if self.output_file != None:
         #     self.record_statistics(str(turn), str(assassin))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--players', type=str, nargs='+', help='list of player types [1. Human / 2. AI]')
-    parser.add_argument('-m', '--mode', type=str, default='interactive', help='mode of the game (interactive / testing)')
+    parser.add_argument('-m', '--mode', type=str, default='interactive', help='mode of the game (interactive / testing/ batch)')
     parser.add_argument('-d', '--data_file', type=int, default=1, help='dataset used by AI in the game (1. cosine_wiki_30k / 2. wup_wiki_30k)')
     parser.add_argument('-s', '--seed', type=int, default=np.random.randint(2**31 - 1), help='random seed used in this game (0 - 2^31-1)')
     parser.add_argument('-o', '--output_file', type=str, default=None, help='the file to record statistics')
     opt = parser.parse_args()
+
+    if opt.mode == 'batch':
+        teamA_wins = 0
+        teamB_wins = 0
+        for i in range(100):
+            game = Codenames(
+                opt.players,
+                opt.mode,
+                opt.data_file,
+                np.random.randint(2**31 - 1),
+                opt.output_file
+            )
+            winning_team = game.play()
+            if winning_team == 'A':
+                teamA_wins += 1
+            else:
+                teamB_wins += 1
+        print("\n" + "*" * 50)
+        print("Batch Mode Results:")
+        print("TEAM A won {} times".format(teamA_wins))
+        print("TEAM B won {} times".format(teamB_wins))
+        print("*" * 50 + "\n")
+        exit()
 
     game = Codenames(
         opt.players,
