@@ -126,6 +126,7 @@ class Codenames:
                 print("TEAM A Guesser: I guess \"{}\" is our word".format(word))
                 idx_in_game_words = np.argwhere(self.game_words == word)
                 time.sleep(1.5 * (self.mode=='interactive'))
+                self.guesses += word
                 if idx_in_game_words < 9:
                     print("TEAM A Spymaster: That is correct!")
                     self.guess_status[idx_in_game_words] = 1
@@ -143,7 +144,6 @@ class Codenames:
                     assassin = True
                     break
 
-            self.guesses += getGuessA
             
             # TEAM A FINISH
             game_ended, winner = self.check_game_end('A', turn)
@@ -174,6 +174,7 @@ class Codenames:
                 print("TEAM B Guesser: I guess \"{}\" is our word".format(word))
                 idx_in_game_words = np.argwhere(self.game_words == word)
                 time.sleep(1.5 * (self.mode=='interactive'))
+                self.guesses += word
                 if idx_in_game_words < 9:
                     print("TEAM B Spymaster: That is incorrect... It is the opponents' word...")
                     self.guess_status[idx_in_game_words] = 1
@@ -199,8 +200,6 @@ class Codenames:
 
             turn += 1
 
-            self.guesses += getGuessB
-        
         # Wrap up and Recording
         print("For reproducibility, the random seed used in this game is {}.".format(self.seed))
         return winner
