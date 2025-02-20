@@ -1,6 +1,7 @@
 import numpy as np
 from wordBase import WordBase, Word
 import time
+import enchant
 import re
 
 
@@ -19,30 +20,49 @@ class Player:
         return
 
     def validate_hint(self, word, count, game_words):
-        if len(re.findall('^[A-Za-z]+$', word)) == 0:
-            print("Please check the format of your input and attempt again.")
+        d = enchant.Dict("en_US")
+
+        #checks if hint is a valid word
+        if not d.check(word):
+            message = "Please check that your hint is a valid word and attempt again."
+            print(message)
             time.sleep(1)
-            return False
+            return False, message
+        
         for game_word in game_words:
             # if clue word contains a board word, return False
-            if game_word.find(word) != -1:
-                return False
+            lowercase_word = word.lower()
+            if lowercase_word.find(game_word.lower()) != -1:
+                message = "Please check that your hint does not contain a word on the board and attempt again."
+                print(message)
+                return False, message
+            
         if count <=0:
-            print("Invalid Count! :{count}\nPlease try again.")
+            message = "Invalid Count! :{count}\nPlease try again."
+            print(message)
             time.sleep(1)
-            return False
-        return True
+            return False, message
+        return True, "Valid Hint"
     
     def validate_guess(self, guesses, number, game_words, guess_status):
         if len(guesses) > int(number) + 1:
-            print("The maximum number of guesses allowed is {}, please try again.".format(number + 1))
-            return False
+            message = "The maximum number of guesses allowed is {}, please try again.".format(int(number) + 1)
+            print(message)
+            time.sleep(1)
+            return False, message
         else:
             for word in guesses:
-                if word not in game_words or guess_status[np.argwhere(game_words == word)[0]] != 0:
-                    print("Sorry, the word \"{}\" you just inputted is not on the board, please try again.".format(word))
-                    return False
-        return True
+                if word.upper() not in game_words:
+                    message = "Sorry, the word \"{}\" you just inputted is not on the board, please try again.".format(word)
+                    print(message)
+                    time.sleep(1)
+                    return False, message
+                # if guess_status[np.argwhere(game_words == word.upper())[0]] != 0:
+                #     message = "Sorry, the word \"{}\" you just inputted has already been guessed, please try again.".format(word)
+                #     print(message)
+                #     time.sleep(1)
+                #     return False, message
+        return True, "Valid Guess"
 
 
 class randomPlayer():
@@ -93,4 +113,3 @@ class Human():
                 if valid_input == True:
                     break
         return guesses
-    
