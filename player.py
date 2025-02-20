@@ -39,7 +39,8 @@ class Player:
             return False
         else:
             for word in guesses:
-                if word not in game_words or guess_status[np.argwhere(game_words == word)[0]] != 0:
+                if word not in game_words:
+                    print(word, game_words, word not in game_words, guess_status)
                     print("Sorry, the word \"{}\" you just inputted is not on the board, please try again.".format(word))
                     return False
         return True
