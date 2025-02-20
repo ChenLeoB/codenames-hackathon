@@ -212,22 +212,27 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mode', type=str, default='interactive', help='mode of the game (interactive / testing/ batch)')
     parser.add_argument('-d', '--data_file', type=int, default=1, help='dataset used by AI in the game (1. cosine_wiki_30k / 2. wup_wiki_30k)')
     parser.add_argument('-s', '--seed', type=int, default=np.random.randint(2**31 - 1), help='random seed used in this game (0 - 2^31-1)')
+    parser.add_argument('-n', '--number_batch', type=int, default=100, help='number of games to play in batch mode')
     parser.add_argument('-o', '--output_file', type=str, default=None, help='the file to record statistics')
     opt = parser.parse_args()
 
     if opt.mode == 'batch':
         teamA_wins = 0
         teamB_wins = 0
-        for i in range(100):
+        for i in range(opt.number_batch):
+            if i % 2 == 0:
+                players = opt.players
+            else:
+                players = [opt.players[2], opt.players[3], opt.players[0], opt.players[1]]
             game = Codenames(
-                opt.players,
+                players,
                 opt.mode,
                 opt.data_file,
                 np.random.randint(2**31 - 1),
                 opt.output_file
             )
             winning_team = game.play()
-            if winning_team == 'A':
+            if (winning_team == 'A' and i % 2 == 0) or (winning_team == 'B' and i % 2 == 1):
                 teamA_wins += 1
             else:
                 teamB_wins += 1
