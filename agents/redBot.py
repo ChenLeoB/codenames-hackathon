@@ -38,7 +38,7 @@ class redBot(Player):
             [
                 (
                     "system", """You are a helpful assistant that guesses upto {number} of words in a game of Codenames out of the total {total_words} based on the clue/hint: {hint} given to you.
-                    Give me the guesses in a form of a words separated by ',' and nothing else. For example: 'Horse, Lion, Tiger' based on the number: 3, hint/clue: 'Animals'."""
+                    Give me the guesses in a form of a words separated by ',' and nothing else. For example: 'HORSE, LION, TIGER' based on the number: 3, hint/clue: 'Animals'."""
                 )
             ]
         )
