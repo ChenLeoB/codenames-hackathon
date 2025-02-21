@@ -65,7 +65,7 @@ class blueBot(Player):
             ]
         )
 
-    def give_hint(self, your_team, opponent_team, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word):
+    def give_hint(self, your_team, opponent_team, game_words, guess_status, team_words, opponent_words, neutral_words, assassin_word, experience):
         formatted_prompt = self.getHintsPrompt.format_messages(your_team = your_team, your_team_words = team_words, opposite_team = opponent_team, opposite_team_words = opponent_words, assassin_word = assassin_word)
         res = self.chat_llm.invoke(formatted_prompt)
         getHint = res.content.split(', ')
@@ -91,7 +91,7 @@ class blueBot(Player):
         #TODO: validation would be one word and not directly in the game words
         #TODO: just queries LLM
 
-    def make_guess(self, hint, number, words, guess_status):
+    def make_guess(self, hint, number, words, guess_status, experience):
         formatted_prompt = self.getGuessPrompt.format_messages(number = number, hint = hint, total_words = words)
         res = self.chat_llm.invoke(formatted_prompt)
         guesses = [guess.strip() for guess in res.content.split(',')]

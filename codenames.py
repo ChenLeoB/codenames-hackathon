@@ -142,6 +142,7 @@ class Codenames:
             getGuessA = self.ta_gs.make_guess(word, count, words_not_guessed, self.guess_status, self.experience)
             guess = getGuessA
             for word in guess:
+                word = word.upper()
                 time.sleep(2 * (self.mode=='interactive'))
                 print("TEAM A Guesser: I guess \"{}\" is our word".format(word))
                 idx_in_game_words = np.argwhere(self.game_words == word)
@@ -202,6 +203,7 @@ class Codenames:
             getGuessB = self.tb_gs.make_guess(word, count, words_not_guessed, self.guess_status, self.experience)
             guess = getGuessB
             for word in guess:
+                word = word.upper()
                 time.sleep(2 * (self.mode=='interactive'))
                 print("TEAM B Guesser: I guess \"{}\" is our word".format(word))
                 idx_in_game_words = np.argwhere(self.game_words == word)
@@ -263,6 +265,8 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     if opt.mode == 'batch':
+        teamA_name = opt.players[0]
+        teamB_name = opt.players[2]
         teamA_wins = 0
         teamB_wins = 0
         for i in range(opt.number_batch):
@@ -284,8 +288,8 @@ if __name__ == '__main__':
                 teamB_wins += 1
         print("\n" + "*" * 50)
         print("Batch Mode Results:")
-        print("TEAM A won {} times".format(teamA_wins))
-        print("TEAM B won {} times".format(teamB_wins))
+        print("TEAM {} won {} times".format(teamA_name, teamA_wins))
+        print("TEAM {} won {} times".format(teamB_name, teamB_wins))
         print("*" * 50 + "\n")
         exit()
 
