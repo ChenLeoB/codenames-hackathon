@@ -9,10 +9,9 @@ import importlib
 import os
 import datetime
 
-#TODO we can remove data_file
 
 class Codenames:
-    def __init__(self, players, mode, data_file, seed, output_file):
+    def __init__(self, players, mode, seed, output_file):
         print("Starting a new game of Codenames on seed {}...".format(seed))
         self.mode = mode
         self.seed = seed
@@ -24,33 +23,25 @@ class Codenames:
         self.initiate_players(players)
 
     def initiate_game(self):
-        # TODO: modify this so that we are just getting 25 random words from our word list from the txt
         # Randomly choose 25 words and assign to teams (9 -> red,8 -> blue,7 -> neutral,1 -> assassin)
         self.game_words = np.random.choice(self.all_game_words, 25, replace=False)
         self.guess_status = np.zeros(25)
-        # TODO: is this dangerous? if player see this they can just always guess depending on the order
         self.word_team = [1] * 9 + [2] * 8 + [3] * 7 + [4]
         # Resuffle for random display
         self.display_order = np.random.choice(range(25), 25, replace=False)
         return None
     
     def initiate_players(self, players):
-        # print(players)
         module = importlib.import_module('agents.' + players[0])
         team_a = getattr(module, players[1])
 
-        # className = getattr(module, team_a_class)
-        # todo remove word_base
-        # self.ta_ms = team_a('a', 'spymaster', self.seed)
-        # self.ta_gs = team_a('a', 'guesser', self.seed)
         self.ta_ms = team_a()
         self.ta_gs = team_a()
 
 
         module = importlib.import_module('agents.' + players[2])
         team_b = getattr(module, players[3])
-        # self.tb_ms = team_b('b', 'spymaster', self.seed)
-        # self.tb_gs = team_b('b', 'guesser', self.seed)
+
         self.tb_ms = team_b()
         self.tb_gs = team_b()
         return None
@@ -93,11 +84,6 @@ class Codenames:
             self.write_to_log(logFile, "GAME OVER IN {} TURNS! TEAM {} wins this one as TEAM {} revealed the assassin word!".format(turn, other_team[team], team))
             return True, other_team[team]
         return False, None
-
-    # def record_statistics(self, turn, assassin):
-    #     with open(self.output_file, 'a') as f:
-    #         f.write(",".join([turn, assassin, self.word_base.get_data_file_name(), str(self.seed)]) + "\n")
-    #     return None
 
     def get_turn_words(self, guess_words, words):
         temp = [word for word in words if word not in guess_words]
@@ -251,14 +237,11 @@ class Codenames:
         # Wrap up and Recording
         print("For reproducibility, the random seed used in this game is {}.".format(self.seed))
         return winner
-        # if self.output_file != None:
-        #     self.record_statistics(str(turn), str(assassin))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--players', type=str, nargs='+', help='list of player types [1. Human / 2. AI]')
     parser.add_argument('-m', '--mode', type=str, default='interactive', help='mode of the game (interactive / testing/ batch)')
-    parser.add_argument('-d', '--data_file', type=int, default=1, help='dataset used by AI in the game (1. cosine_wiki_30k / 2. wup_wiki_30k)')
     parser.add_argument('-s', '--seed', type=int, default=np.random.randint(2**31 - 1), help='random seed used in this game (0 - 2^31-1)')
     parser.add_argument('-n', '--number_batch', type=int, default=100, help='number of games to play in batch mode')
     parser.add_argument('-o', '--output_file', type=str, default=None, help='the file to record statistics')
@@ -277,7 +260,6 @@ if __name__ == '__main__':
             game = Codenames(
                 players,
                 opt.mode,
-                opt.data_file,
                 np.random.randint(2**31 - 1),
                 opt.output_file
             )
@@ -296,7 +278,6 @@ if __name__ == '__main__':
     game = Codenames(
         opt.players,
         opt.mode,
-        opt.data_file,
         opt.seed,
         opt.output_file
     )
