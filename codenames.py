@@ -35,6 +35,7 @@ class Codenames:
         module = importlib.import_module('agents.' + players[0])
         team_a = getattr(module, players[1])
 
+        self.ta_name = players[0]
         self.ta_ms = team_a()
         self.ta_gs = team_a()
 
@@ -42,6 +43,7 @@ class Codenames:
         module = importlib.import_module('agents.' + players[2])
         team_b = getattr(module, players[3])
 
+        self.tb_name = players[2]
         self.tb_ms = team_b()
         self.tb_gs = team_b()
         return None
@@ -119,11 +121,11 @@ class Codenames:
             neutral_words = self.get_turn_words(self.guesses, self.game_words[17:24])
             assasin_word = self.get_turn_words(self.guesses, self.game_words[24])
             word, count = self.ta_ms.give_hint('A', 'B', self.game_words, self.guess_status, team_a_words, team_b_words, neutral_words, assasin_word, self.experience)
-            self.write_to_log(logFile, "Team A Hint For Turn {}:{}:{}".format(turn, word, count))
+            self.write_to_log(logFile, "Team A ({}) Hint For Turn {}:{}:{}".format(self.ta_name, turn, word, count))
             self.experience += [{"team": "Team A", "action": "Hint", "prompt": word, "count": count}]
             # TEAM A GUESS
             self.display_board(self.guess_status, 'A', turn)
-            print("TEAM A Spymaster: My hint is {}: {}".format(word, count))
+            print("TEAM A Spymaster ({}): My hint is {}: {}".format(self.ta_name, word, count))
             words_not_guessed = self.game_words[np.where(self.guess_status == 0)]
             getGuessA = self.ta_gs.make_guess(word, count, words_not_guessed, self.guess_status, self.experience)
             guess = getGuessA
@@ -180,11 +182,11 @@ class Codenames:
             neutral_words = self.get_turn_words(self.guesses, self.game_words[17:24])
             assasin_word = self.get_turn_words(self.guesses, self.game_words[24])
             word, count = self.tb_ms.give_hint('B', 'A', self.game_words, self.guess_status, team_b_words, team_a_words, neutral_words, assasin_word, self.experience)
-            self.write_to_log(logFile, "Team B Hint For Turn {}:{}:{}".format(turn, word, count))
+            self.write_to_log(logFile, "Team B ({}) Hint For Turn {}:{}:{}".format(self.tb_name, turn, word, count))
             self.experience += [{"team": "Team A", "action": "Hint", "prompt": word, "count": count}]
             # TEAM B GUESS
             self.display_board(self.guess_status, 'B', turn)
-            print("TEAM B Spymaster: My hint is {}: {}".format(word, count))
+            print("TEAM B Spymaster ({}): My hint is {}: {}".format(self.tb_name, word, count))
             words_not_guessed = self.game_words[np.where(self.guess_status == 0)]
             getGuessB = self.tb_gs.make_guess(word, count, words_not_guessed, self.guess_status, self.experience)
             guess = getGuessB
