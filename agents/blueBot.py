@@ -3,16 +3,20 @@ import numpy as np
 from langchain_core.prompts import ChatPromptTemplate
 from bentley.llm_proxy import MLServiceAzureChatOpenAI
 from pymlrestclientV1_3 import MLClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class blueBot(Player):
     def __init__(self):
         self.auth_client = MLClient(
-        base_url="http://dev-connect-ml-service-eus.bentley.com",
-        auth_uri="https://qa-ims.bentley.com",
-        client_id="codenames-hackathon",
-        client_secret="gAj5TPt6d/ig+KoWVcmvHP+I9znW66r6pdNVAu3AIjUqovX5fw5Km7QQWkg+0Wtq/QrtoHtXWce6I3NdnLZ+8w==",
-        scopes="aiml:llm-proxy",
-        application_type="service",)
+        base_url=os.getenv("ML_BASE_URL"),
+        auth_uri=os.getenv("ML_AUTH_URI"),
+        client_id=os.getenv("ML_CLIENT_ID"),
+        client_secret=os.getenv("ML_CLIENT_SECRET"),
+        scopes=os.getenv("ML_SCOPES"),
+        application_type=os.getenv("ML_APPLICATION_TYPE"),)
 
         def get_token():
             return self.auth_client.token
